@@ -54,6 +54,8 @@ Error conditions:
 
 # NOTE - Add import statements to allow access to Python library functions
 # NOTE - Hint:  Look at  https://docs.python.org/3/library/operator.html
+import operator 
+import sys 
 
 # ------------------------------------------------------------------------
 # Constants
