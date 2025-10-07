@@ -73,7 +73,7 @@ operators = {
   "+": operator.add,
   "-": operator.sub,
   "*": operator.mul,
-  "/": operator.truediv
+  "/": operator.truediv,
   "%": operator.mod,
   "**": operator.pow,
   ">>": operator.rshift,
@@ -101,7 +101,7 @@ def get_user_input():
     except:
         return (None, None, None)
       
-    return (number1, muber2, func)
+    return (number1, number2, func)
 
 # End def
 
