@@ -87,21 +87,26 @@ operators = {
 # ------------------------------------------------------------------------
 
 def get_user_input():
-    """ Get input from the user.
-        Returns tuple:  (number, number, function) or 
-                        (None, None, None) if inputs invalid
-    """
-    # NOTE - Use "try"/"except" statements to allow code to handle errors gracefully.      
     try:
-        number1 = float(input("Enter first number : "))
-        number2 = float(input("Enter second number : "))
-        op      = input("Enter function (valid values are +,-,*,/): ")
+        number1 = float(input("Enter first number: "))
+        number2 = float(input("Enter second number: "))
+        op = input(f"Enter operator {list(operators.keys())}: ")
 
-        func    = operators.get(op)
+        func = operators.get(op)
+        if func is None:
+            print("Unsupported operator:", op)
+            return (None, None, None)
+
+        # Convert to int for bitwise operators
+        if op in (">>", "<<"):
+            number1 = int(number1)
+            number2 = int(number2)
+
+        return (number1, number2, func)
     except:
+        print("Invalid input")
         return (None, None, None)
-      
-    return (number1, number2, func)
+
 
 # End def
 
