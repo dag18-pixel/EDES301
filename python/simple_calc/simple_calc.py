@@ -4,7 +4,7 @@
 Simple Calculator
 --------------------------------------------------------------------------
 License:   
-Copyright 2025 - <NAME>
+Copyright 2025 - Daniel, Gutierrez 
 
 Redistribution and use in source and binary forms, with or without 
 modification, are permitted provided that the following conditions are met:
@@ -68,8 +68,10 @@ Error conditions:
 # NOTE - Global variable to map an operator string (e.g. "+") to 
 # NOTE - the appropriate function.
 operators = {
-    # Dictionary syntax:  "key" : "value"
-    #   i.e. "function" : operator.<function>
+  "+": operator.add,
+  "-": operator.sub,
+  "*": operator.mul,
+  "/": operator.truediv
 }
 
 
@@ -85,14 +87,15 @@ def get_user_input():
     """
     # NOTE - Use "try"/"except" statements to allow code to handle errors gracefully.      
     try:
-        # NOTE - Use "pass" statements to allow code to be run without having to 
-        # NOTE - fill out the contents.  This pass statement should be removed    
-        pass
-        
-        # NOTE - User input is generally returned as a string and must be translated.
+        number1 = float(input("Enter first number : "))
+        number2 = float(input("Enter second number : "))
+        op      = input("Enter function (valid values are +,-,*,/): ")
+
+        func    = operators.get(op)
     except:
-        print("Invalid Input")
         return (None, None, None)
+      
+    return (number1, muber2, func)
 
 # End def
 
@@ -113,6 +116,14 @@ def get_user_input():
 
 if __name__ == "__main__":
 
+    while True: 
+      (num1, num2, func) = get_user_input()
+
+      if (num1 == None) or (num2 == None) or (func == None):
+          print("Invalid input")
+          break 
+        
+      print(func(num1, num2))
     # NOTE - Need to add main calculator functionality:
     # NOTE -   - Use a loop construct to repeat the operation
     # NOTE -   - Get the input from the user (i.e. use function created above)    
