@@ -1,52 +1,55 @@
-import sounddevice as sd
-import numpy as np
-import matplotlib
-matplotlib.use('Agg')  # Use non-GUI backend
-import matplotlib.pyplot as plt
-import Adafruit_BBIO.GPIO as GPIO
-import time
+import sounddevice as sd #Library for the audio input/output (microphone/speakers)
+import numpy as np #Library for the numerical operations, especially array manipulation
+import matplotlib #This is matplotlib it is meant for plotting and visualization 
+matplotlib.use('Agg')  # Sets the matplotlib for plotting and visualization 
+import matplotlib.pyplot as plt #Pyplot module allows for creating plots
+import Adafruit_BBIO.GPIO as GPIO #This library is for general purpose Input/Output (GPIO) 
+import time #Library for time-related functions, such as delays 
 
-# --- Import THE OLD (GOOD) OLED Libraries ---
-import Adafruit_SSD1306
-from PIL import Image, ImageDraw, ImageFont
+# --- Import THE OLED Libraries ---
+import Adafruit_SSD1306 #This is the driver library for the SSD1306-based OLED display
+from PIL import Image, ImageDraw, ImageFont #Pillow (PIL) library for the prupose of image manipulation and drawing text 
 
 # ----------------------------
 # USER CONFIGURATION
 # ----------------------------
-fs = 44100          # Sampling rate (Hz)
-device = 'hw:1,0'   # Your USB microphone device
-output_file = "waveform.png"
-BUTTON_PIN = "P1_36" # Your working button pin
+fs = 44100          # This is the sampling rate in Hertz (Hz) - which is the standard for CD quality audio 
+device = 'hw:1,0'   # This specifies the usb microphone in ALSA format 
+output_file = "waveform.png" #This is the file name for the saved waveform image 
+BUTTON_PIN = "P1_36" # GPIO pin name for the button input 
 
 # --- OLED CONFIGURATION ---
-# !! SET THIS to the bus number that worked in i2cdetect (1 or 2) !!
-I2C_BUS = 1         
-RST = None          # Use None if the RST pin isn't connected
-# 128x64 or 128x32. Change this to match your display.
+I2C_BUS = 1         # I2C bus number connected to the OLED display 
+RST = None          # Not connected 
+# The following initializes the 128x64 OLED display object, using the specified I2C bus
 disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST, i2c_bus=I2C_BUS)
 # ----------------------------
 
 # --- GPIO Setup ---
+#The following configures the specified button pin as an input, with an internal pull-up resistor 
+#PUD_UP means that the pin is normally high (3.3V) and goes Low when the button is pressed (falling edge)
 try:
     GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 except Exception as e:
+    # The following catches any errors during GPIO setup (such as an invalid pin name) and exits
     print(f"Error setting up GPIO: {e}")
     exit(1)
 
 # --- OLED Display Setup ---
 try:
-    disp.begin()
-    disp.clear()
-    disp.display()
+    disp.begin() #This initializes the display by turning it on 
+    disp.clear() # This command clears the display buffer (sets all the pixels to black)
+    disp.display() #Write the cleared buffer to the screen
     print("OLED Display Initialized.")
-    # Create blank image for drawing.
+    # Creates a blank image for drawing in 1-bit (black and white) format.
     width = disp.width
     height = disp.height
     image = Image.new('1', (width, height))
-    draw = ImageDraw.Draw(image)
-    # Load a default font.
+    draw = ImageDraw.Draw(image) #This gets the drawing object for the image
+    # The following loads the default font for displaying the text.
     font = ImageFont.load_default()
 except Exception as e:
+    # The following catches any error during the OLED initialization and exits 
     print(f"Error initializing OLED: {e}")
     print("Check your I2C bus number and connections.")
     exit(1)
@@ -54,23 +57,29 @@ except Exception as e:
 # --- Helper Function to Display Messages ---
 def display_message(line1, line2=""):
     """Draws 1 or 2 lines of text to the OLED screen."""
+    #The following draws a filled black rectangle over the whole image to clear it 
     draw.rectangle((0, 0, width, height), outline=0, fill=0) # Clear image
+    #Draws the first line of text at the top-left corner (0, 0)
     draw.text((0, 0),  line1, font=font, fill=255)
+    # Draws the second line of text, offset by 10 pixels vertically 
     draw.text((0, 10), line2, font=font, fill=255)
-    disp.image(image)
-    disp.display()
+    disp.image(image) #Copies the PIL image buffer to the display driver 
+    disp.display() #Updates the physical OLED screen with the new image 
 
 # --- Main Loop ---
 try:
-    display_message("Press button", "to record.") # <-- Changed!
+    display_message("Press button", "to record.") # Initial message on OLED
     print("Stethoscope script initialized.")
     print(f"Press and hold the button on {BUTTON_PIN} to record.")
 
     while True:
         print("\nWaiting for button press...")
-        display_message("Press button", "to record.") # <-- Changed!
+        display_message("Press button", "to record.") # Show ready message
+        
+        time.sleep(0.1) 
         
         # 1. Wait for button press (FALLING edge)
+        #Block the execution until the button is pressed (pin voltage )
         GPIO.wait_for_edge(BUTTON_PIN, GPIO.FALLING)
         
         print("Recording started. Release button to stop.")
