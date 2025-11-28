@@ -79,31 +79,33 @@ try:
         time.sleep(0.1) 
         
         # 1. Wait for button press (FALLING edge)
-        #Block the execution until the button is pressed (pin voltage )
+        #Block the execution until the button is pressed (pin voltage drops from HIGH to LOW) )
         GPIO.wait_for_edge(BUTTON_PIN, GPIO.FALLING)
         
         print("Recording started. Release button to stop.")
         display_message("RECORDING...", "(Hold button)")
 
-        recorded_chunks = []
+        recorded_chunks = [] #List to store blocks of recorded audio data 
 
-        # 2. Audio callback
+        # 2. Audio callback function
         def audio_callback(indata, frames, time, status):
+            # Function is called automatically by sounddevice when a new block of audio is available 
             if status:
-                print(status, flush=True)
-            recorded_chunks.append(indata.copy())
+                print(status, flush=True) # Print any status information/warnings
+            recorded_chunks.append(indata.copy()) # Append a copy of the new audio data to the list 
 
         # 3. Start the audio stream
-        stream = sd.InputStream(
-            samplerate=fs,
-            device=device,
-            channels=1,
-            dtype='int16',
-            callback=audio_callback
+        stream = sd.InputStream( 
+            samplerate=fs, #sets the sample rate
+            device=device, #specifies the microphone device 
+            channels=1,    # Mono recording 
+            dtype='int16', # Data type for the samples (16-bit integers)
+            callback=audio_callback #function that calls with new audio data 
         )
-        stream.start()
+        stream.start() # Begins the non-blocking audio recording stream 
 
-        # 4. Wait for button release (RISING edge)
+        # 4. Waits for button release (RISING edge) 
+        # Blocks execution until the button is released (pin voltage rises from LOW to High)
         GPIO.wait_for_edge(BUTTON_PIN, GPIO.RISING)
         
         print("Recording stopped.")
@@ -115,35 +117,37 @@ try:
 
         if not recorded_chunks:
             print("No audio recorded.")
-            continue 
+            continue # skips to the next iteration of the while loop 
 
         # 6. Process the audio
+        # Combines all recorded NumPy arrays into a single array 
         audio = np.concatenate(recorded_chunks)
+        # Flattens the array (e.g., converts (N, 1) shape to (N,))
         audio = audio.flatten()
         print(f"{len(audio)} samples captured.")
 
-# 7. Plot waveform (This is your original code)
-        plt.figure(figsize=(10, 4))
-        plt.plot(audio, color='blue')
+# 7. Plots waveform
+        plt.figure(figsize=(10, 4)) #Creates a new Matplotlib figure
+        plt.plot(audio, color='blue') #Plots the audio data as a line graph 
         plt.title("Audio Waveform")
         plt.xlabel("Sample Number")
         plt.ylabel("Amplitude")
-        plt.tight_layout()
-        plt.savefig(output_file)
+        plt.tight_layout() #Adjusts plot parameters for the tight layout 
+        plt.savefig(output_file) #Saves the plot to the specified PNG file 
 
         print(f"Waveform saved as {output_file}")
         
         # --- NEW: DISPLAY WAVEFORM ON OLED ---
-        display_message("Loading PNG...", "") # Show a loading message
+        display_message("Loading PNG...", "") # Shows a loading message
         try:
-            # Open the saved waveform using Pillow
+            # Opens the saved waveform using Pillow
             img = Image.open(output_file)
             
             # Resize it to fit the display (128x64)
-            # We use ANTIALIAS for a better-looking resize
+            # Employs Image.LANCZOS (a high-quality resampling filter for shrinking) for better-looking resized images
             img = img.resize((disp.width, disp.height), Image.ANTIALIAS)
             
-            # Convert the image to 1-bit (black and white)
+            # Converts the image to 1-bit (black and white) format 
             img = img.convert('1') 
             
             # Display the processed image on the OLED
@@ -151,21 +155,23 @@ try:
             disp.display()
             print("Waveform image displayed on OLED.")
             
-            # Show the image for 4 seconds
+            # Shows the image for a set duration (4 seconds)
             time.sleep(4)
             
         except Exception as e:
             print(f"Error displaying image on OLED: {e}")
             display_message("Error:", "Image load fail")
             time.sleep(2)
-        # --- END OF NEW CODE ---
+        
 
 except KeyboardInterrupt:
+    # Allows the user to exit the script gracefully with Ctrl+C
     print("\nExiting script.")
 finally:
-    GPIO.cleanup()
-    display_message("Goodbye!") # Clear display on exit
+    # Cleanup block always executed before the script finishes 
+    GPIO.cleanup() #reset all used GPIO pins to their default state 
+    display_message("Goodbye!") # Display final message on OLED
     time.sleep(1)
-    disp.clear()
-    disp.display()
+    disp.clear() #Clear the display buffer
+    disp.display() #update the screen to be blank 
     print("GPIO cleanup complete.")
