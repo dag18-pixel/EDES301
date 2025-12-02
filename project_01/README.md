@@ -1,5 +1,5 @@
 <h1>Electronic Stethoscope Project</h1>
-This repository contains the software and instructions for an electronic stethoscope that transforms a pocket beagle into a dedicated digital stethoscope or audio recording device. The device uses a USB microphone for input and an SSD1306 OLED display for user feedback and waveform visualization. 
+This repository contains the software and instructions for an electronic stethoscope that transforms a pocket beagle into a dedicated digital stethoscope or audio recording device. The device uses a USB microphone for input and an SSD1306 OLED display for user feedback and waveform visualization. Hackster.io: https://www.hackster.io/dag18/electronic-stethoscope-dcbf88 
 
 <h2>Prerequisites (Hardware & Software)</h2>
 <h3>Hardware Components</h3>
